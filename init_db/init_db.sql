@@ -1,0 +1,30 @@
+CREATE TABLE IF NOT EXISTS project_groups (
+    id SERIAL PRIMARY KEY,
+    group_name VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS documents (
+    id SERIAL PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    group_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (group_id) REFERENCES project_groups(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS summaries (
+    id SERIAL PRIMARY KEY,
+    group_id INTEGER NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    summary TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (group_id) REFERENCES project_groups(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS mindmaps (
+    id SERIAL PRIMARY KEY,
+    group_id INTEGER NOT NULL,
+    mindmap_data JSON NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (group_id) REFERENCES project_groups(id) ON DELETE CASCADE
+);

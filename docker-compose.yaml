@@ -1,0 +1,92 @@
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      # POSTGRES_USER: dongwon
+      # POSTGRES_PASSWORD: 1313
+      # POSTGRES_DB: autobrief_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init_db/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "dongwon", "-d", "autobrief_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: always
+  
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_running -q
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./data/qdrant_data:/qdrant/storage
+
+  backend:
+    build:
+      context: ./core
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./core:/app/core
+      - ./data/project_groups:/app/data/project_groups
+    ports:
+      - "8000:8000"
+    command: uvicorn core.app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: always
+
+  # 문서 처리 워커
+  worker:
+    build:
+      context: ./core
+      dockerfile: Dockerfile
+    volumes:
+      - ./core:/app/core
+      - ./data/project_groups:/app/data/project_groups
+    env_file:
+      - ./.env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - rabbitmq
+      - qdrant
+    command: python -u -m core.app.worker
+    restart: always
+
+  streamlit:
+    build:
+      context: ./streamlit
+      dockerfile: Dockerfile
+    container_name: brief_streamlit
+    volumes:
+      - ./streamlit:/app
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:

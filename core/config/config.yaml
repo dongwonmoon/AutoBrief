@@ -1,0 +1,9 @@
+data:
+  data_dir: "/app/data/project_groups"
+
+db:
+  host: "postgres"
+  dbname: "autobrief_db"
+  user: "dongwon"
+  password: 1313
+  port: 5432

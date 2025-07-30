@@ -1,0 +1,13 @@
+pyyaml
+fastapi
+uvicorn
+pika
+psycopg2-binary
+python-multipart
+langchain
+langchain-community
+langchain-openai
+langchain-unstructured
+unstructured[all-docs] 
+qdrant-client
+pydantic
