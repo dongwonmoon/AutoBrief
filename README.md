@@ -82,6 +82,8 @@
     - **⚙️ Backend API Docs (FastAPI)**: `http://localhost:8000/docs`
 
 ## 📁 프로젝트 구조 (Project Structure)
+
+```
 ├── core/                # FastAPI 백엔드 및 Worker 소스코드
 │   ├── api/             # API 엔드포인트 정의
 │   ├── app/             # FastAPI 앱, Worker 진입점
@@ -93,3 +95,4 @@
 ├── .env                 # 환경 변수 파일
 ├── docker-compose.yaml  # 서비스 오케스트레이션 설정
 └── README.md            # 바로 이 파일
+```
